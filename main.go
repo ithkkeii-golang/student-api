@@ -55,6 +55,34 @@ func createStudent(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(student)
 }
 
+func updateStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r) // get params
+
+	// Loop through student and findById
+	for _, student := range students {
+		if student.ID == params["id"] {
+			json.NewEncoder(w).Encode(student)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(&Student{})
+}
+
+func deleteStudent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r) // get params
+
+	// Loop through student and findById
+	for index, student := range students {
+		if student.ID == params["id"] {
+			students = append(students[:index], students[index+1:]...)
+			json.NewEncoder(w).Encode(students)
+		}
+	}
+}
+
 func getTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(students)
@@ -81,8 +109,14 @@ func main() {
 	router.HandleFunc("/api/students", getStudents)
 	router.HandleFunc("/api/students/{id}", getStudent)
 	router.HandleFunc("/api/student", createStudent).Methods("POST")
+	router.HandleFunc("/api/students/{id}", updateStudent).Methods("PUT")
+	router.HandleFunc("/api/students/{id}", deleteStudent).Methods("DELETE")
+
 	router.HandleFunc("/api/teachers", getTeachers)
 	router.HandleFunc("/api/teachers/{id}", getTeacher)
+	// router.HandleFunc("/api/teacher", createTeacher).Method("POST")
+	// router.HandleFunc("/api/teachers/{id}", updateTeacher).Method("PUT")
+	// router.HandleFunc("/api/teachers/{id}", deleteTeacher).Method("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 
