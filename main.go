@@ -60,10 +60,16 @@ func updateStudent(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r) // get params
 
 	// Loop through student and findById
-	for _, student := range students {
+	for index, student := range students {
 		if student.ID == params["id"] {
+			students = append(students[:index], students[index+1:]...)
+
+			var student Student
+			_ = json.NewDecoder(r.Body).Decode(&student)
+			student.ID = params["id"]
+
+			students = append(students, student)
 			json.NewEncoder(w).Encode(student)
-			return
 		}
 	}
 
